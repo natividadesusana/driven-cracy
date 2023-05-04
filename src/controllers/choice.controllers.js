@@ -1,4 +1,4 @@
-export async function createChoice(req, res) {
+export async function createChoices(req, res) {
   try {
 
   } catch (error) {
@@ -6,7 +6,7 @@ export async function createChoice(req, res) {
   }
 }
 
-export async function createVote(req, res) {
+export async function createVotes(req, res) {
   try {
     
   } catch (error) {

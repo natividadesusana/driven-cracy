@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createChoice, createVote } from "../controllers/choice.controllers.js";
+import { createChoices, createVotes } from "../controllers/choice.controllers.js";
 
 const choiceRouter = Router();
 
-choiceRouter.post("/choice", createChoice);
-choiceRouter.post("/choice/:id/vote", createVote);
+choiceRouter.post("/choice", createChoices);
+choiceRouter.post("/choice/:id/vote", createVotes);
 
 export default choiceRouter;
