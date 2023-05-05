@@ -46,7 +46,6 @@ export async function getChoicePolls(req, res) {
   }
 }
 
-
 export async function getResultPolls(req, res) {
   try {
   } catch (error) {

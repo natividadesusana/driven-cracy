@@ -11,7 +11,7 @@ export async function createChoices(req, res) {
     if (!poll) {
       return res.status(404).send("Poll not found!");
     }
-    
+
     if (dayjs(poll.expireAt) < dayjs()) {
       return res.status(403).send("Poll has already expired!");
     }
@@ -32,7 +32,35 @@ export async function createChoices(req, res) {
 }
 
 export async function createVotes(req, res) {
+  const { id } = req.params;
+  const now = dayjs();
+  console.log(id)
   try {
+    const choice = await db.collection("choices").findOne({ _id: new ObjectId(id) });
+
+    if (!choice) {
+      return res.status(404).send("Choice not found!");
+    }
+
+    const poll = await db.collection("polls").findOne({ _id: new ObjectId(choice.pollId) });
+    console.log(choice.poolId)
+    if (!poll) {
+      return res.status(404).send("Poll not found!");
+    }
+
+    const expired = now.isAfter(dayjs(poll.expireAt));
+
+    if (expired) {
+      return res.status(403).send("Poll is expired!");
+    }
+
+    const vote = {
+      createdAt: now.toDate(),
+      choiceId: id,   
+    };
+
+    await db.collection("votes").insertOne(vote);
+    res.status(201).send("Vote created successfully!");
   } catch (error) {
     res.status(500).send(error.message);
   }
