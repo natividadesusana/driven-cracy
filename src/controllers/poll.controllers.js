@@ -31,11 +31,21 @@ export async function getPolls(req, res) {
 }
 
 export async function getChoicePolls(req, res) {
+  const { id } = req.params;
+
   try {
+    const choices = await db.collection("choices").find({ pollId: id }).toArray();
+
+    if (choices.length === 0) {
+      return res.status(404).send("Poll not found!");
+    }
+
+    res.send(choices);
   } catch (error) {
     res.status(500).send(error.message);
   }
 }
+
 
 export async function getResultPolls(req, res) {
   try {
