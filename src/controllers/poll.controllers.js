@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
+import { ObjectId } from "mongodb";
 import { db } from "../database/database.config.js";
 
 export async function createPolls(req, res) {
   const { title, expireAt } = req.body;
 
-  if (!title || title.trim() === "") {
+  if (!title || title.trim().length === 0) {
     return res.status(422).send("Title is required!");
-  }
+  }  
 
   const expireDate = expireAt
     ? dayjs(expireAt).format("YYYY-MM-DD HH:mm")
@@ -47,7 +48,40 @@ export async function getChoicePolls(req, res) {
 }
 
 export async function getResultPolls(req, res) {
+  const { id } = req.params;
+
   try {
+    const poll = await db.collection("polls").findOne({ _id: new ObjectId(id) });
+
+    if (!poll) {
+      return res.status(404).send("Poll not found!");
+    }
+    const choices = await db.collection("choices").find({ pollId: id }).toArray();
+    const choicesIds = choices.map(choice => choice._id.toString());
+
+    const votes = await db.collection("votes").find({ choiceId: { $in: choicesIds }}).toArray();
+    console.log(votes)
+
+    const voteCount = choices.map((choice) => {
+      const count = votes.filter((vote) => vote.choiceId === choice._id.toString()).length;
+      return { ...choice, count };
+    });
+
+    const mostVotedChoice = voteCount.reduce((max, choice) => {
+      return choice.count > max.count ? choice : max;
+    }, { count: 0 });
+
+    const response = {
+      _id: poll._id,
+      title: poll.title,
+      expireAt: poll.expireAt,
+      result: {
+        title: mostVotedChoice.title,
+        votes: mostVotedChoice.count,
+      },
+    };
+
+    res.status(200).send(response);
   } catch (error) {
     res.status(500).send(error.message);
   }
