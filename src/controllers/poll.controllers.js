@@ -5,10 +5,6 @@ import { db } from "../database/database.config.js";
 export async function createPolls(req, res) {
   const { title, expireAt } = req.body;
 
-  if (!title || title.trim().length === 0) {
-    return res.status(422).send("Title is required!");
-  }  
-
   const expireDate = expireAt
     ? dayjs(expireAt).format("YYYY-MM-DD HH:mm")
     : dayjs().add(30, "day").format("YYYY-MM-DD HH:mm");
@@ -60,7 +56,6 @@ export async function getResultPolls(req, res) {
     const choicesIds = choices.map(choice => choice._id.toString());
 
     const votes = await db.collection("votes").find({ choiceId: { $in: choicesIds }}).toArray();
-    console.log(votes)
 
     const voteCount = choices.map((choice) => {
       const count = votes.filter((vote) => vote.choiceId === choice._id.toString()).length;
